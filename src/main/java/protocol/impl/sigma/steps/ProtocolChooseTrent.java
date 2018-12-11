@@ -157,8 +157,8 @@ public class ProtocolChooseTrent implements ProtocolStep {
 	/*
 	 * The round here is 
 	 * 		+ 0 if the list hasn't been setup with other peers
-	 * 		+ 1 if the random numbers aren't all recovered
-	 * 		+ 2 if the random numbers aren't all recovered
+	 * 		+ 1 if the random numbers aren't sent
+	 * 		+ 2 if the random numbers aren't recovered
 	 * 		+ 3 if Trent is already chosen
 	 */
 	public int getRound() {
@@ -179,8 +179,7 @@ public class ProtocolChooseTrent implements ProtocolStep {
 			this.finalNumber = this.ra;
 			gra = G.modPow(ra, P);			
 		}
-		System.out.println(key.getPublicKey().toString().substring(0, 4) + " SM0 ra :" + ra.toString());
-		System.out.println(key.getPublicKey().toString().substring(0, 4) + " gra: " + gra.toString());
+		System.out.println("user " + senderKeyId + " start: generate ra and Gra");
 		String[] content = {"0", json.toJson(list)};
 		String senPubK = key.getPublicKey().toString();
 		assert(contract.getHashableData() != null);
@@ -215,7 +214,7 @@ public class ProtocolChooseTrent implements ProtocolStep {
 						finalNumber = ra;
 						gra = G.modPow(ra, P);			
 					}
-					System.out.println("Round 0: user " + senderKeyId + " get list from user" + j);
+					System.out.println("Round 0: user " + senderKeyId + " get list from user " + j);
 					Collection<User> list2 = json.toEntity(content[1]);
 			        ListIterator<User> it = list.listIterator();
 					while(it.hasNext()){
@@ -239,13 +238,13 @@ public class ProtocolChooseTrent implements ProtocolStep {
 						es.sendContract(TITLE+contractId, jsonMessage.toJson(toBeSent), senPubK, peer, uris);
 					}
 				}
-				// If we receive the others random number
+				// If we receive the others encrypted number
 				else if (content[0].equals("1") && Arrays.asList(hasSent[1]).indexOf(null) != (-1)){
-					// Wait for everyone to have sent their number
+					// Wait for everyone to have sent their encrypted number
 					if (hasSent[1][j] == null){
 						hasSent[1][j] = "";
 						grb = new BigInteger(content[1]);
-						System.out.println("Round 1: user " + senderKeyId + " receive grb from user "+ j);
+						System.out.println("Round 1: user " + senderKeyId + " receive Grb from user "+ j);
 					}
 					if (Arrays.asList(hasSent[1]).indexOf(null) == N){
 						System.out.println("Round 1: user " + senderKeyId + " ready to enter round 2 ");
