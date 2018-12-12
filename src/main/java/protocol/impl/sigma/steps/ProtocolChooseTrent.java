@@ -28,7 +28,7 @@ import protocol.impl.sigma.SigmaContract;
 
 /**
  * Choose Trent with the other peers for this contract
- * @author neon@ec-m.fr
+ * @author neon@ec-m.fr chen.dang@etu.univ-amu.fr
  * 
  * The format of data sent here is a String[2] with
  * 		data[0] = round
