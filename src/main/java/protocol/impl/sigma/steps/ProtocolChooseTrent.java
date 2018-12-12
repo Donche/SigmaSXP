@@ -205,18 +205,21 @@ public class ProtocolChooseTrent implements ProtocolStep {
 			@Override
 			public void notify(String title, String msg, String senderId) {
 				String[] content = jsonMessage.toEntity(msg);
+				//search sender id
 				int j = 0;
 				while (!(contract.getParties().get(j).getPublicKey().toString().equals(senderId))){j++;}
 				// If we received a new list
 				if (content[0].equals("0") && Arrays.asList(hasSent[0]).indexOf(null) != (-1)){
+					//if the receiver hasn't generated the number
 					if(ra == null) {
 						ra = new BigInteger(100, new SecureRandom());
 						finalNumber = ra;
 						gra = G.modPow(ra, P);			
 					}
 					System.out.println("Round 0: user " + senderKeyId + " get list from user " + j);
+					//remove the users who are not in common list
 					Collection<User> list2 = json.toEntity(content[1]);
-			        ListIterator<User> it = list.listIterator();
+			        	ListIterator<User> it = list.listIterator();
 					while(it.hasNext()){
 						boolean isInBoth = false;
 						for (User u : list2){
@@ -227,6 +230,7 @@ public class ProtocolChooseTrent implements ProtocolStep {
 							it.remove();
 					}
 					hasSent[0][j] = "";
+					//if we have received lists from all parties
 					if (Arrays.asList(hasSent[0]).indexOf(null) == N){
 						hasSent[0][N] = "";
 						System.out.println("Round 0: user " + senderKeyId + " send its Gra to all users in contract");
@@ -246,6 +250,7 @@ public class ProtocolChooseTrent implements ProtocolStep {
 						grb = new BigInteger(content[1]);
 						System.out.println("Round 1: user " + senderKeyId + " receive Grb from user "+ j);
 					}
+					//if we have received encrypted number from all parties
 					if (Arrays.asList(hasSent[1]).indexOf(null) == N){
 						System.out.println("Round 1: user " + senderKeyId + " ready to enter round 2 ");
 						hasSent[1][N] = "";
@@ -267,6 +272,7 @@ public class ProtocolChooseTrent implements ProtocolStep {
 						grab = gra.modPow(rb, P);
 						finalNumber = ra.add(rb);
 					}
+					//if we have received random number from all parties
 					if (Arrays.asList(hasSent[2]).indexOf(null) == N){
 						hasSent[2][N] = "";
 						list.sort(new Comparator<User>(){
@@ -276,6 +282,7 @@ public class ProtocolChooseTrent implements ProtocolStep {
 							}
 						});
 						int N2 = (int) list.size();
+						//if the number isn't correct
 						if (grab.compareTo(grba) != 0){
 							System.out.println("Round 2: user " + senderKeyId + " finds grab != grba, protocol cancelled");
 							for (int k=0; k<hasSent.length; k++)
@@ -286,6 +293,7 @@ public class ProtocolChooseTrent implements ProtocolStep {
 						else if (N2 == 0){
 							System.out.println("Can't go on - there is no third party available");
 						}
+						//if everything goes well
 						else {
 							User trentUser = list.get(finalNumber.mod(new BigInteger(String.valueOf(N2))).intValue());
 							if (sigmaE.sigmaEstablisherData.getTrentKey() ==null){
@@ -325,7 +333,9 @@ public class ProtocolChooseTrent implements ProtocolStep {
 							System.out.println("Round 3: user " + senderKeyId + " finishes TTP protocol");
 							nextStep();
 						}
-					}else {
+					}
+					// if the chosen trent isn't the same
+					else {
 						System.out.println("Round 3: user " + senderKeyId + " trent not equal");
 						for (int k=0; k<hasSent.length; k++)
 							hasSent[k] = new String[contract.getParties().size()];
